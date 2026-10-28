@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Карта недвижимости Турции</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+        .nav { background: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; gap: 1.5rem; }
+        .nav a { text-decoration: none; color: #3498db; font-weight: bold; font-size: 1.1rem; }
+        .nav a:hover { color: #2980b9; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #2c3e50; margin-bottom: 1rem; }
+        #map { height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1; }
+        .legend { background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); line-height: 1.5; }
+        .legend i { width: 12px; height: 12px; float: left; margin-right: 8px; opacity: 0.8; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">🏠 Прогноз</a>
+        <a href="/dashboard">📊 Дашборд</a>
+        <a href="/map">🗺️ Карта</a>
+        <a href="/help">❓ Help</a>
+    </div>
+
+    <div class="container">
+        <h1>🗺️ Распределение недвижимости по городам Турции</h1>
+        <p style="color: #7f8c8d; margin-bottom: 1rem;">Размер круга отражает количество объектов, а цвет — среднюю стоимость.</p>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        const map = L.map('map').setView([39.0, 35.0], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        function getColor(price) {
+            return price > 4000000 ? '#d73027' : 
+                   price > 3000000 ? '#fc8d59' : 
+                   price > 2000000 ? '#fee08b' : 
+                                     '#91bfdb';  
+        }
+
+        fetch('/api/map_data')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const radius = Math.sqrt(item.count) / 15; 
+                    const color = getColor(item.avg_price);
+
+                    L.circleMarker([item.lat, item.lon], {
+                        radius: radius,
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    }).addTo(map)
+                    .bindPopup(`
+                        <div style="text-align: center; min-width: 150px;">
+                            <h3 style="margin: 0 0 5px 0; color: #2c3e50;">${item.city}</h3>
+                            <p style="margin: 5px 0; font-size: 1.1rem; font-weight: bold; color: #27ae60;">
+                                ${item.avg_price.toLocaleString()} TRY
+                            </p>
+                            <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">
+                                Объектов: ${item.count.toLocaleString()}
+                            </p>
+                        </div>
+                    `);
+                });
+
+                const legend = L.control({position: 'bottomright'});
+                legend.onAdd = function (map) {
+                    const div = L.DomUtil.create('div', 'legend');
+                    const grades = [0, 2000000, 3000000, 4000000];
+                    const labels = ['< 2 млн', '2 - 3 млн', '3 - 4 млн', '> 4 млн'];
+                    
+                    div.innerHTML += '<strong>Средняя цена</strong><br>';
+                    for (let i = 0; i < grades.length; i++) {
+                        div.innerHTML += `<i style="background: ${getColor(grades[i] + 1)}"></i> ${labels[i]} TRY<br>`;
+                    }
+                    return div;
+                };
+                legend.addTo(map);
+            })
+            .catch(err => console.error("Ошибка загрузки данных карты:", err));
+    </script>
+</body>
+</html>

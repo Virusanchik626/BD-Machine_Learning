@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Справка и документация</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .nav { margin-bottom: 2rem; }
+        .nav a { margin-right: 1.5rem; text-decoration: none; color: #3498db; font-weight: bold; }
+        h1, h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem; margin-top: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        ul { padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #ecf0f1; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: #e74c3c; }
+        .badge { display: inline-block; background: #3498db; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; margin-right: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">🏠 Прогноз</a>
+        <a href="/dashboard">📊 Дашборд</a>
+        <a href="/map">🗺️ Карта</a>
+        <a href="/help">❓ Help</a>
+    </div>
+
+    <h1> Справка и документация</h1>
+
+    <div class="card">
+        <h2> О проекте</h2>
+        <p>Данное приложение представляет собой систему машинного обучения для прогнозирования стоимости недвижимости на рынке Турции. Решение разработано в рамках командного проекта (Муфтахутдинов Алмаз, Воробьев Артем).</p>
+        <p><strong>Цель:</strong> Предоставить пользователю быстрый и точный инструмент оценки рыночной стоимости объекта на основе его характеристик.</p>
+    </div>
+
+    <div class="card">
+        <h2> Описание входных признаков</h2>
+        <ul>
+            <li><span class="badge">Город</span> Локация объекта (Стамбул, Анталья, Измир и др.). Сильно влияет на базовую стоимость.</li>
+            <li><span class="badge">Тип сделки</span> Продажа или аренда. Модели учитывают эту разницу на этапе кодирования.</li>
+            <li><span class="badge">Комнаты</span> Формат планировки (например, <code>3+1</code>). Преобразуется в числовой признак <code>rooms_numeric</code>.</li>
+            <li><span class="badge">Площадь</span> Общая площадь объекта в квадратных метрах (м²). Главный коррелирующий признак с ценой.</li>
+            <li><span class="badge">Этаж / Этажность</span> Номер этажа объекта и общее количество этажей в здании. Используется для расчета признака <code>floor_ratio</code>.</li>
+            <li><span class="badge">Возраст здания</span> Срок эксплуатации в годах. Значения "20 и более" приводятся к числу 20 для корректной работы модели.</li>
+            <li><span class="badge">Отопление и подтип</span> Категориальные признаки комфорта (Kombi, Klima, Квартира, Дом и т.д.).</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2> Описание модели</h2>
+        <p>В качестве финальной выбрана модель <strong>Random Forest Regressor (с настроенными гиперпараметрами)</strong>.</p>
+        <ul>
+            <li><strong>Почему она?</strong> Лучший баланс между точностью (R² = 0.7535) и устойчивостью к выбросам и нелинейным зависимостям в данных о недвижимости.</li>
+            <li><strong>Гиперпараметры:</strong> <code>n_estimators=200</code>, <code>max_depth=15</code>, <code>min_samples_split=5</code>.</li>
+            <li><strong>Метрики на тесте:</strong> 
+                <ul>
+                    <li><strong>R²:</strong> 0.7535 (модель объясняет ~75% дисперсии цен)</li>
+                    <li><strong>MAE:</strong> ~64,223 TRY (средняя абсолютная ошибка)</li>
+                </ul>
+            </li>
+            <li><strong>Предобработка:</strong> Все категориальные признаки проходят One-Hot Encoding. Числовые признаки (<code>size</code>, <code>floor_no</code> и др.) масштабируются с помощью <code>RobustScaler</code>, устойчивого к выбросам.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2> Как пользоваться и ограничения</h2>
+        <ol>
+            <li>Перейдите на вкладку <strong>"🏠 Прогноз"</strong>.</li>
+            <li>Заполните форму, указав реальные характеристики объекта. Поля, отмеченные <code>*</code>, обязательны.</li>
+            <li>Нажмите "Рассчитать стоимость".</li>
+        </ol>
+        <p><strong>⚠️ Важно:</strong> </p>
+        <img src="/static/almaz.jpg" alt="Пример заполнения формы" style="max-width: 100%; height: auto; border-radius: 8px;">
+    </div>
+</body>
+</html>

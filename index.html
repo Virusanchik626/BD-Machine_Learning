@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогноз стоимости недвижимости</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #f5f5f5; }
+        h1 { color: #2c3e50; }
+        .nav { margin-bottom: 2rem; }
+        .nav a { margin-right: 1.5rem; text-decoration: none; color: #3498db; font-weight: bold; }
+        .nav a:hover { color: #2980b9; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: #34495e; }
+        input, select { width: 100%; padding: 0.6rem; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 1rem; }
+        input:focus, select:focus { outline: none; border-color: #3498db; }
+        .row { display: flex; gap: 1rem; }
+        .row > div { flex: 1; }
+        button { background: #27ae60; color: white; padding: 0.8rem 2rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; width: 100%; }
+        button:hover { background: #229954; }
+        .result { background: white; padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .price { font-size: 2.2rem; color: #27ae60; font-weight: bold; margin: 1rem 0; }
+        .error { background: #f8d7da; border-left: 4px solid #e74c3c; padding: 0.8rem; margin: 0.5rem 0; border-radius: 4px; }
+        .hint { font-size: 0.85rem; color: #7f8c8d; margin-top: 0.2rem; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">🏠 Прогноз</a>
+        <a href="/dashboard">📊 Дашборд</a>
+        <a href="/map">🗺️ Карта</a>
+        <a href="/help">❓ ПОМОГИТЕ</a>
+    </div>
+
+    <h1>Оценка недвижимости в Турции 🇹🇷</h1>
+
+    {% if error %}
+    <div class="error"><strong>Ошибка:</strong> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/predict">
+        <div class="form-group">
+            <label>Город *</label>
+            <select name="city" required>
+                <option value="Стамбул" {% if input_data and input_data.city == 'Стамбул' %}selected{% endif %}>Стамбул</option>
+                <option value="Анталья" {% if input_data and input_data.city == 'Анталья' %}selected{% endif %}>Анталья</option>
+                <option value="Измир" {% if input_data and input_data.city == 'Измир' %}selected{% endif %}>Измир</option>
+                <option value="Анкара" {% if input_data and input_data.city == 'Анкара' %}selected{% endif %}>Анкара</option>
+                <option value="Бурса" {% if input_data and input_data.city == 'Бурса' %}selected{% endif %}>Бурса</option>
+                <option value="Мугла" {% if input_data and input_data.city == 'Мугла' %}selected{% endif %}>Мугла</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Комнат *</label>
+                <select name="room_count" required>
+                    {% for r in ['1+0','1+1','2+1','3+1','4+1','5+1','2+2','3+2','4+2'] %}
+                    <option value="{{ r }}" {% if input_data and input_data.room_count == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Тип сделки *</label>
+                <select name="listing_type" required>
+                    <option value="Продажа" {% if input_data and input_data.listing_type == 'Продажа' %}selected{% endif %}>Продажа</option>
+                    <option value="Аренда" {% if input_data and input_data.listing_type == 'Аренда' %}selected{% endif %}>Аренда</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Площадь (м²) *</label>
+            <input type="number" name="size" step="1" min="10" max="1000" value="{{ input_data.size if input_data else 100 }}" required>
+            <div class="hint">От 10 до 1000 м²</div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Этаж *</label>
+                <input type="number" name="floor_no" min="0" max="100" value="{{ input_data.floor_no if input_data else 3 }}" required>
+            </div>
+            <div class="form-group">
+                <label>Этажей в доме *</label>
+                <input type="number" name="total_floor_count" min="1" max="150" value="{{ input_data.total_floor_count if input_data else 10 }}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Возраст здания *</label>
+            <select name="building_age" required>
+                <option value="0" {% if input_data and input_data.building_age == '0' %}selected{% endif %}>0 (Новостройка)</option>
+                <option value="1-5" {% if input_data and input_data.building_age == '1-5' %}selected{% endif %}>1-5 лет</option>
+                <option value="6-10" {% if input_data and input_data.building_age == '6-10' %}selected{% endif %}>6-10 лет</option>
+                <option value="11-20" {% if input_data and input_data.building_age == '11-20' %}selected{% endif %}>11-20 лет</option>
+                <option value="20 и более" {% if input_data and input_data.building_age == '20 и более' %}selected{% endif %}>20 и более</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Тип отопления</label>
+                <select name="heating_type">
+                    <option value="Kombi (Doğalgaz)" {% if input_data and input_data.heating_type == 'Kombi (Doğalgaz)' %}selected{% endif %}>Kombi (Doğalgaz)</option>
+                    <option value="Merkezi Sistem" {% if input_data and input_data.heating_type == 'Merkezi Sistem' %}selected{% endif %}>Merkezi Sistem</option>
+                    <option value="Klima" {% if input_data and input_data.heating_type == 'Klima' %}selected{% endif %}>Klima</option>
+                    <option value="Soba" {% if input_data and input_data.heating_type == 'Soba' %}selected{% endif %}>Soba</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Тип недвижимости</label>
+                <select name="type">
+                    <option value="Жильё" {% if input_data and input_data.type == 'Жильё' %}selected{% endif %}>Жильё</option>
+                    <option value="Коммерческая" {% if input_data and input_data.type == 'Коммерческая' %}selected{% endif %}>Коммерческая</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Подтип недвижимости</label>
+            <select name="sub_type">
+                <option value="Квартира" {% if input_data and input_data.sub_type == 'Квартира' %}selected{% endif %}>Квартира</option>
+                <option value="Дом" {% if input_data and input_data.sub_type == 'Дом' %}selected{% endif %}>Дом</option>
+                <option value="Резиденция" {% if input_data and input_data.sub_type == 'Резиденция' %}selected{% endif %}>Резиденция</option>
+                <option value="Вилла" {% if input_data and input_data.sub_type == 'Вилла' %}selected{% endif %}>Вилла</option>
+            </select>
+        </div>
+
+        <button type="submit">Рассчитать стоимость</button>
+    </form>
+
+    {% if prediction %}
+    <div class="result">
+        <h3>Прогнозируемая стоимость:</h3>
+        <div class="price">{{ prediction }} TRY</div>
+        <p style="color: #7f8c8d;">Модель: Random Forest (tuned) · R² = 0.75</p>
+    </div>
+    {% endif %}
+</body>
+</html>
