@@ -81,6 +81,17 @@ Ridge (tuned)
 В log-шкале качество высокое (R² ≈ 0.94), но в лирах ниже (R² ≈ 0.75): ошибки на дорогих объектах перевешивают.
 MAPE в лирах очень большая (≈ 660 %), так как у дешёвых объектов (аренда) небольшая абсолютная ошибка даёт огромную относительную. Поэтому основные метрики - MAE, RMSE и R².
 
+Приложение:
+<img width="848" height="814" alt="Снимок экрана 2026-10-28 133308" src="https://github.com/user-attachments/assets/959ae24f-60bc-425c-83a6-51ef524e264b" />
+
+<img width="667" height="843" alt="Снимок экрана 2026-10-28 133622" src="https://github.com/user-attachments/assets/9d6f9632-6f5f-4d99-8a79-16dae0166367" />
+
+<img width="1049" height="811" alt="Снимок экрана 2026-10-28 133648" src="https://github.com/user-attachments/assets/efbd9bc2-366b-4847-98bb-d9dba3044d29" />
+
+<img width="824" height="806" alt="Снимок экрана 2026-10-28 133718" src="https://github.com/user-attachments/assets/4a42c328-7cb0-46ba-b595-b831c41d6382" />
+
+<img width="1278" height="723" alt="Снимок экрана 2026-10-28 133706" src="https://github.com/user-attachments/assets/ea6bbfab-7785-4f15-8362-d54a5f55d4ea" />
+
 Запуск
 pip install -r requirements.txt
 streamlit run app.py
